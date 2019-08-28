@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: sftp
-        image: "{{ .Values.sftp.repository }}:{{ .Values.sftp.tag }}"
+        image: "atmoz/sftp:alpine"
         command: [/bin/bash, -c, "bash /entrypoint $SFTP_USER:$SFTP_PASSWORD:33:33"]
         ports:
         - containerPort: 22
@@ -38,7 +38,7 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 12 }}
       - name: nginx
-        image: "{{ .Values.nginx.repository }}:{{ .Values.nginx.tag }}"
+        image: "nginx:alpine"
         ports:
         - containerPort: 80
         volumeMounts:

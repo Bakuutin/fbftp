@@ -1,14 +1,6 @@
 ### CONTAINERS ###
 
-nginx:
-  repository: "nginx"
-  tag: "alpine"
-  worker_connections: 10240
-  worker_processes: 2
-
 sftp:
-  repository: "atmoz/sftp"
-  tag: "alpine"
   port: 22
 
   ## sftp.user SFTP User
