@@ -1,8 +1,8 @@
 ### CONTAINERS ###
 
 nginx:
-  repository: "nginx"
-  tag: "alpine"
+  repository: docker-registry.jx.dev.friendzone.bot/bakuutin/fbftp
+  tag: 0.0.4
   worker_connections: 10240
   worker_processes: 2
 
