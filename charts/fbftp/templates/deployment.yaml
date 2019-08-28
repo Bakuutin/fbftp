@@ -15,6 +15,13 @@ spec:
         app: {{ template "fbftp.name" . }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+      - name: chown
+        image: busybox:latest
+        command: ['/bin/chown', '-R', 'nobody:nogroup', '/webroot']
+        volumeMounts:
+        - name: webroot
+          mountPath: /webroot/
       containers:
       - name: sftp
         image: "atmoz/sftp:alpine"
