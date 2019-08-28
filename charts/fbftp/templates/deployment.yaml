@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "lamp.fullname" . }}
+  name: {{ template "fbftp.fullname" . }}
   labels:
-    app: {{ template "lamp.name" . }}
+    app: {{ template "fbftp.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "lamp.name" . }}
+        app: {{ template "fbftp.name" . }}
         release: {{ .Release.Name }}
     spec:
       containers:
@@ -25,12 +25,12 @@ spec:
         - name: SFTP_USER
           valueFrom:
             secretKeyRef:
-              name: {{ template "lamp.fullname" . }}
+              name: {{ template "fbftp.fullname" . }}
               key: sftp-user
         - name: SFTP_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ template "lamp.fullname" . }}
+              name: {{ template "fbftp.fullname" . }}
               key: sftp-password
         volumeMounts:
         - name: webroot
@@ -52,10 +52,10 @@ spec:
       volumes:
       - name: nginx-conf
         configMap:
-          name: "{{ template "lamp.fullname" . }}-nginx"
+          name: "{{ template "fbftp.fullname" . }}-nginx"
           items:
           - key: nginx.conf
             path: nginx.conf
       - name: webroot
         persistentVolumeClaim:
-          claimName: {{ template "lamp.fullname" . }}
+          claimName: {{ template "fbftp.fullname" . }}

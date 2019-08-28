@@ -6,11 +6,11 @@ INIT:
 {{ if contains "LoadBalancer" .Values.service.type }}
 LOADBALANCER:
   Please wait until the service has been routed to an IP address.
-  You can watch the status of by running 'kubectl get svc -w {{ template "lamp.fullname" . }}'
+  You can watch the status of by running 'kubectl get svc -w {{ template "fbftp.fullname" . }}'
 {{- end }}
 
 You can now connect to the following services:
-  export CHARTIP=$(kubectl get svc {{ template "lamp.fullname" . }} --output=jsonpath={.status.loadBalancer.ingress..ip})
+  export CHARTIP=$(kubectl get svc {{ template "fbftp.fullname" . }} --output=jsonpath={.status.loadBalancer.ingress..ip})
 
   Main Site:
     http://$CHARTIP
