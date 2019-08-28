@@ -13,8 +13,8 @@ pipelineConfig:
           - command: jx step changelog --version v${VERSION}
             name: promote-changelog
           - command: jx step helm release
-            dir: /workspace/source
+            dir: /workspace/source/charts/fbftp
             name: promote-helm-release
           - command: jx promote -b --all-auto --timeout 1h --version ${VERSION}
-            dir: /workspace/source
+            dir: /workspace/source/charts/fbftp
             name: promote-jx-promote

@@ -1,51 +1,61 @@
-{{- if .Values.knativeDeploy }}
-{{- else }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "lamp.fullname" . }}
   labels:
-    draft: {{ default "draft-app" .Values.draft }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: {{ template "lamp.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        draft: {{ default "draft-app" .Values.draft }}
-        app: {{ template "fullname" . }}
-{{- if .Values.podAnnotations }}
-      annotations:
-{{ toYaml .Values.podAnnotations | indent 8 }}
-{{- end }}
+        app: {{ template "lamp.name" . }}
+        release: {{ .Release.Name }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        env:
-{{- range $pkey, $pval := .Values.env }}
-        - name: {{ $pkey }}
-          value: {{ quote $pval }}
-{{- end }}
+      - name: sftp
+        image: "{{ .Values.sftp.repository }}:{{ .Values.sftp.tag }}"
+        command: [/bin/bash, -c, "bash /entrypoint $SFTP_USER:$SFTP_PASSWORD:33:33"]
         ports:
-        - containerPort: {{ .Values.service.internalPort }}
-        livenessProbe:
-          httpGet:
-            path: {{ .Values.probePath }}
-            port: {{ .Values.service.internalPort }}
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-          successThreshold: {{ .Values.livenessProbe.successThreshold }}
-          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-        readinessProbe:
-          httpGet:
-            path: {{ .Values.probePath }}
-            port: {{ .Values.service.internalPort }}
-          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-          successThreshold: {{ .Values.readinessProbe.successThreshold }}
-          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+        - containerPort: 22
+        env:
+        - name: SFTP_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "lamp.fullname" . }}
+              key: sftp-user
+        - name: SFTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "lamp.fullname" . }}
+              key: sftp-password
+        volumeMounts:
+        - name: webroot
+          mountPath: /home/{{ .Values.sftp.user }}/web/
         resources:
 {{ toYaml .Values.resources | indent 12 }}
-      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
-{{- end }}
+      - name: nginx
+        image: "{{ .Values.nginx.repository }}:{{ .Values.nginx.tag }}"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx
+          readOnly: true
+          name: nginx-conf
+        - name: webroot
+          mountPath: /srv/webroot/
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: "{{ template "lamp.fullname" . }}-nginx"
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: webroot
+        persistentVolumeClaim:
+          claimName: {{ template "lamp.fullname" . }}
