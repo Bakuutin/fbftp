@@ -18,7 +18,7 @@ spec:
       initContainers:
       - name: chown
         image: busybox:latest
-        command: ['/bin/chown', '-R', 'nobody:nogroup', '/webroot']
+        command: ['/bin/chown', '-R', '33:33', '/webroot']
         volumeMounts:
         - name: webroot
           mountPath: /webroot/
